@@ -1,0 +1,17 @@
+#first {
+    background-color: burlywood;
+   display: inline-block;
+}
+#second {
+    
+    background-color: azure;
+    display: inline-block;
+    position: absolute;
+    left: 360px;
+    top: 79px;
+   
+}
+image {
+    position:relative;
+    top: 10px;
+}
