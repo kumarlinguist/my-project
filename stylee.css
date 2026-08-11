@@ -1,4 +1,4 @@
- /* 
+ /
  #main {
     
    margin-right: 200px
@@ -8,11 +8,11 @@
     bottom: 2px;
     left: 2px;
     top: 2px;
- } */
+ } 
  
  
  
- /* #a {
+  #a {
     background-color: black;
     height: 60px;
     
@@ -43,22 +43,22 @@ input {
     position: relative;
     bottom: 10px;
 }
-  */
+  
 
-     /* div {   
+      div {   
     height: 100px;
-     width: 200px; */
+     width: 200px; 
 
 
-     /* background-color: blue;    */
+      background-color: blue;    
 
 
-     /* border: 2px solid black; 
+      border: 2px solid black; 
     color: aliceblue; 
-   */
    
-/*     
- } */
+  
+   
+ } 
 
     
    
