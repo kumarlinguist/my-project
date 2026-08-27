@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequential Blinking Lights</title>
+    <style>
+        /* Center everything on the screen */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+        }
+
+        /* Container for the lights */
+        .light-container {
+            display: flex;
+            gap: 20px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Base styles for each circle light */
+        .light {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            opacity: 0.2; /* Turned off by default */
+            transition: opacity 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Specific colors when active (turned on) */
+        .red.active {
+            opacity: 1;
+            background-color: #ff3333;
+            box-shadow: 0 0 20px #ff3333, 0 0 40px #ff3333;
+        }
+
+        .yellow.active {
+            opacity: 1;
+            background-color: #ffcc00;
+            box-shadow: 0 0 20px #ffcc00, 0 0 40px #ffcc00;
+        }
+
+        .green.active {
+            opacity: 1;
+            background-color: #33cc33;
+            box-shadow: 0 0 20px #33cc33, 0 0 40px #33cc33;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HTML Layout: The Container holding 3 color divs -->
+    <div class="light-container">
+        <div class="light red" id="light-0"></div>
+        <div class="light yellow" id="light-1"></div>
+        <div class="light green" id="light-2"></div>
+    </div>
+
+    <!-- JavaScript Logic: Managing the sequential loop -->
+    <script>
+        // Store all elements with the class 'light' in an array
+        const lights = document.querySelectorAll('.light');
+        let currentIndex = 0;
+
+        function blinkSequence() {
+            // 1. Remove the 'active' class from all lights to turn them off
+            lights.forEach(light => light.classList.remove('active'));
+
+            // 2. Add the 'active' class to the current light in line
+            lights[currentIndex].classList.add('active');
+
+            // 3. Update the index counter to point to the next light
+            // The modulo operator (%) resets the index back to 0 once it hits 3
+            currentIndex = (currentIndex + 1) % lights.length;
+        }
+
+        // Initialize the first light immediately
+        blinkSequence();
+
+        // Automatically toggle the lights every 1000 milliseconds (1 second)
+        setInterval(blinkSequence, 1000);
+    </script>
+
+</body>
+</html>
