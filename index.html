@@ -3,90 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sequential Blinking Lights</title>
+    <title>Multi-Person Chat Room</title>
     <style>
-        /* Center everything on the screen */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #1a1a1a;
         }
 
-        /* Container for the lights */
-        .light-container {
+        .chat-container {
+            width: 100%;
+            max-width: 450px;
+            height: 80vh;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: flex;
-            gap: 20px;
-            background-color: #333;
-            padding: 20px;
-            border-radius: 50px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* Base styles for each circle light */
-        .light {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            opacity: 0.2; /* Turned off by default */
-            transition: opacity 0.2s ease, box-shadow 0.2s ease;
+        /* Setup Screen */
+        #setup-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 30px;
+            text-align: center;
         }
 
-        /* Specific colors when active (turned on) */
-        .red.active {
-            opacity: 1;
-            background-color: #ff3333;
-            box-shadow: 0 0 20px #ff3333, 0 0 40px #ff3333;
+        #setup-screen h2 {
+            margin-bottom: 20px;
+            color: #333;
         }
 
-        .yellow.active {
-            opacity: 1;
-            background-color: #ffcc00;
-            box-shadow: 0 0 20px #ffcc00, 0 0 40px #ffcc00;
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
         }
 
-        .green.active {
-            opacity: 1;
-            background-color: #33cc33;
-            box-shadow: 0 0 20px #33cc33, 0 0 40px #33cc33;
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0084ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #0066cc;
+        }
+
+        /* Chat Screen */
+        #chat-screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .chat-header {
+            background: #0084ff;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .leave-btn {
+            background: transparent;
+            border: 1px solid white;
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .leave-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .messages-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .msg .sender {
+            font-size: 11px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+            color: #555;
+        }
+
+        /* Styling for current user vs other users */
+        .msg.me {
+            background-color: #d9fdd3;
+            align-self: flex-end;
+        }
+        .msg.me .sender {
+            color: #2b7a2b;
+        }
+
+        .msg.others {
+            background-color: #fff;
+            align-self: flex-start;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background: #f0f0f0;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .input-area button {
+            width: auto;
+            padding: 0 20px;
         }
     </style>
 </head>
 <body>
 
-    <!-- HTML Layout: The Container holding 3 color divs -->
-    <div class="light-container">
-        <div class="light red" id="light-0"></div>
-        <div class="light yellow" id="light-1"></div>
-        <div class="light green" id="light-2"></div>
+    <div class="chat-container">
+        <!-- SCREEN 1: Choose Username -->
+        <div id="setup-screen">
+            <h2>Join Chat Room</h2>
+            <input type="text" id="username-input" placeholder="Enter your name..." autocomplete="off">
+            <button id="join-btn">Join Chat</button>
+        </div>
+
+        <!-- SCREEN 2: The Chat Interface -->
+        <div id="chat-screen">
+            <div class="chat-header">
+                <span id="room-title">Chat Room</span>
+                <button class="leave-btn" id="leave-btn">Leave</button>
+            </div>
+            <div class="messages-box" id="messages-box">
+                <!-- Messages will appear here dynamically -->
+            </div>
+            <div class="input-area">
+                <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
     </div>
 
-    <!-- JavaScript Logic: Managing the sequential loop -->
     <script>
-        // Store all elements with the class 'light' in an array
-        const lights = document.querySelectorAll('.light');
-        let currentIndex = 0;
+        const setupScreen = document.getElementById('setup-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const usernameInput = document.getElementById('username-input');
+        const joinBtn = document.getElementById('join-btn');
+        const leaveBtn = document.getElementById('leave-btn');
+        const messagesBox = document.getElementById('messages-box');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
 
-        function blinkSequence() {
-            // 1. Remove the 'active' class from all lights to turn them off
-            lights.forEach(light => light.classList.remove('active'));
+        let currentUser = "";
 
-            // 2. Add the 'active' class to the current light in line
-            lights[currentIndex].classList.add('active');
+        // 1. Join Chat Logic
+        joinBtn.addEventListener('click', () => {
+            const name = usernameInput.value.trim();
+            if (name) {
+                currentUser = name;
+                setupScreen.style.display = 'none';
+                chatScreen.style.display = 'flex';
+                loadMessages();
+            }
+        });
 
-            // 3. Update the index counter to point to the next light
-            // The modulo operator (%) resets the index back to 0 once it hits 3
-            currentIndex = (currentIndex + 1) % lights.length;
+        // 2. Send Message Logic
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (!text) return;
+
+            // Grab existing messages or start a new array
+            const chatHistory = JSON.parse(localStorage.getItem('multi_chat_history')) || [];
+            
+            // Create a new message object
+            const newMsg = {
+                sender: currentUser,
+                text: text,
+                timestamp: Date.now()
+            };
+
+            chatHistory.push(newMsg);
+            localStorage.setItem('multi_chat_history', JSON.stringify(chatHistory));
+
+            msgInput.value = "";
+            loadMessages();
+
+            // Trigger an update event manually for the local tab
+            window.dispatchEvent(new Event('storage'));
         }
 
-        // Initialize the first light immediately
-        blinkSequence();
+        sendBtn.addEventListener('click', sendMessage);
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
-        // Automatically toggle the lights every 1000 milliseconds (1 second)
-        setInterval(blinkSequence, 1000);
+        // 3. Load and Display Messages
+        function loadMessages() {
+            const chatHistory = JSON.parse(localStorage.getItem('multi_chat_history')) || [];
+            messagesBox.innerHTML = ''; // Clear previous UI content
+
+            chatHistory.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                // Check if message belongs to the current user or someone else
+                const isMe = msg.sender === currentUser;
+                
+                msgDiv.className = `msg ${isMe ? 'me' : 'others'}`;
+                msgDiv.innerHTML = `<span class="sender">${msg.sender}</span>${msg.text}`;
+                
+                messagesBox.appendChild(msgDiv);
+            });
+
+            // Scroll to the bottom of the chat box
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        // 4. Live Sync Across Tabs/Windows
+        // This listens to any changes happening in localStorage on another tab
+        window.addEventListener('storage', () => {
+            if (chatScreen.style.display === 'flex') {
+                loadMessages();
+            }
+        });
+
+        // 5. Leave Chat Logic
+        leaveBtn.addEventListener('click', () => {
+            currentUser = "";
+            chatScreen.style.display = 'none';
+            setupScreen.style.display = 'flex';
+            usernameInput.value = "";
+        });
     </script>
-
 </body>
 </html>
