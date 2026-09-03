@@ -1,283 +1,2410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Person Chat Room</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vidoo - Video Platform</title>
 
-        body {
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,Helvetica,sans-serif;
+}
 
-        .chat-container {
-            width: 100%;
-            max-width: 450px;
-            height: 80vh;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+:root{
+  --primary:#ff1744;
+  --bg:#f7f7f7;
+  --card:#fff;
+  --text:#171717;
+  --muted:#777;
+  --border:#e5e5e5;
+}
 
-        /* Setup Screen */
-        #setup-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            padding: 30px;
-            text-align: center;
-        }
+body.dark{
+  --bg:#0f0f0f;
+  --card:#181818;
+  --text:#fff;
+  --muted:#aaa;
+  --border:#303030;
+}
 
-        #setup-screen h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
+body{
+  background:var(--bg);
+  color:var(--text);
+  transition:.2s;
+}
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
+/* HEADER */
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #0084ff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
+header{
+  height:65px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:0 18px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
 
-        button:hover {
-            background-color: #0066cc;
-        }
+.logo{
+  font-size:24px;
+  font-weight:bold;
+  color:var(--primary);
+  cursor:pointer;
+}
 
-        /* Chat Screen */
-        #chat-screen {
-            display: none;
-            flex-direction: column;
-            flex: 1;
-        }
+.search{
+  flex:1;
+  max-width:650px;
+  display:flex;
+}
 
-        .chat-header {
-            background: #0084ff;
-            color: white;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.search input{
+  width:100%;
+  padding:12px 16px;
+  border:1px solid var(--border);
+  border-radius:25px 0 0 25px;
+  outline:none;
+  background:var(--bg);
+  color:var(--text);
+}
 
-        .leave-btn {
-            background: transparent;
-            border: 1px solid white;
-            padding: 5px 10px;
-            font-size: 12px;
-            width: auto;
-            border-radius: 4px;
-        }
+.search button{
+  width:55px;
+  border:0;
+  background:var(--primary);
+  color:white;
+  border-radius:0 25px 25px 0;
+  cursor:pointer;
+}
 
-        .leave-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
+.header-actions{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 
-        .messages-box {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background: #e5ddd5;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+.icon-btn{
+  border:0;
+  background:transparent;
+  color:var(--text);
+  font-size:21px;
+  cursor:pointer;
+  padding:8px;
+}
 
-        .msg {
-            max-width: 75%;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            position: relative;
-            word-wrap: break-word;
-        }
+.avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:var(--primary);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-        .msg .sender {
-            font-size: 11px;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 3px;
-            color: #555;
-        }
+/* LAYOUT */
 
-        /* Styling for current user vs other users */
-        .msg.me {
-            background-color: #d9fdd3;
-            align-self: flex-end;
-        }
-        .msg.me .sender {
-            color: #2b7a2b;
-        }
+.layout{
+  display:flex;
+}
 
-        .msg.others {
-            background-color: #fff;
-            align-self: flex-start;
-        }
+.sidebar{
+  width:230px;
+  min-height:calc(100vh - 65px);
+  background:var(--card);
+  border-right:1px solid var(--border);
+  padding:15px 10px;
+  position:fixed;
+  top:65px;
+  left:0;
+  overflow:auto;
+}
 
-        .input-area {
-            display: flex;
-            padding: 10px;
-            background: #f0f0f0;
-            gap: 10px;
-        }
+.side-btn{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  padding:13px 15px;
+  text-align:left;
+  border-radius:10px;
+  cursor:pointer;
+  margin-bottom:4px;
+  font-size:15px;
+}
 
-        .input-area input {
-            flex: 1;
-            margin-bottom: 0;
-        }
+.side-btn:hover{
+  background:var(--bg);
+}
 
-        .input-area button {
-            width: auto;
-            padding: 0 20px;
-        }
-    </style>
+.side-btn.active{
+  background:#ffe5ea;
+  color:var(--primary);
+  font-weight:bold;
+}
+
+body.dark .side-btn.active{
+  background:#35131b;
+}
+
+.main{
+  margin-left:230px;
+  width:calc(100% - 230px);
+  padding:25px;
+}
+
+/* PAGES */
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+/* HERO */
+
+.hero{
+  background:linear-gradient(135deg,#ff1744,#7b1fa2);
+  color:white;
+  padding:45px;
+  border-radius:18px;
+  margin-bottom:25px;
+}
+
+.hero h1{
+  font-size:38px;
+  margin-bottom:10px;
+}
+
+.hero p{
+  opacity:.9;
+  margin-bottom:20px;
+}
+
+.primary{
+  border:0;
+  background:var(--primary);
+  color:white;
+  padding:12px 20px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.hero .primary{
+  background:white;
+  color:#e60035;
+}
+
+/* CHIPS */
+
+.chips{
+  display:flex;
+  gap:10px;
+  overflow:auto;
+  margin-bottom:25px;
+}
+
+.chip{
+  white-space:nowrap;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  padding:9px 17px;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+.chip.active,
+.chip:hover{
+  background:var(--primary);
+  color:white;
+  border-color:var(--primary);
+}
+
+/* VIDEO GRID */
+
+.video-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:24px;
+}
+
+.video-card{
+  background:var(--card);
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.video-card:hover{
+  transform:translateY(-3px);
+}
+
+.thumbnail{
+  height:150px;
+  background:linear-gradient(135deg,#222,#555);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:42px;
+  position:relative;
+}
+
+.duration{
+  position:absolute;
+  bottom:8px;
+  right:8px;
+  background:#000;
+  color:#fff;
+  padding:4px 6px;
+  border-radius:4px;
+  font-size:12px;
+}
+
+.video-info{
+  padding:13px;
+}
+
+.video-info h3{
+  font-size:16px;
+  margin-bottom:8px;
+}
+
+.video-info p{
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:4px;
+}
+
+/* FORMS */
+
+.form-box{
+  max-width:600px;
+  margin:auto;
+  background:var(--card);
+  padding:30px;
+  border-radius:15px;
+  border:1px solid var(--border);
+}
+
+.form-group{
+  margin-bottom:17px;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:7px;
+  font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  outline:none;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.form-group textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+/* PROFILE */
+
+.profile-card{
+  max-width:700px;
+  margin:auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:30px;
+}
+
+.profile-avatar{
+  width:90px;
+  height:90px;
+  background:var(--primary);
+  color:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:35px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+/* LOGIN */
+
+.login-box{
+  max-width:450px;
+  margin:40px auto;
+  background:var(--card);
+  padding:30px;
+  border-radius:16px;
+  border:1px solid var(--border);
+}
+
+.login-box h2{
+  margin-bottom:10px;
+}
+
+.auth-status{
+  color:var(--muted);
+  margin-bottom:22px;
+}
+
+.hidden{
+  display:none !important;
+}
+
+/* VIDEO MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:500;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:min(900px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:var(--card);
+  border-radius:15px;
+  padding:20px;
+}
+
+.close{
+  float:right;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  font-size:28px;
+  cursor:pointer;
+}
+
+.video-player{
+  width:100%;
+  aspect-ratio:16/9;
+  background:#000;
+  border-radius:10px;
+  margin:10px 0 15px;
+}
+
+.modal-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:15px 0;
+}
+
+.small-btn{
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  padding:9px 14px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.small-btn:hover{
+  background:var(--bg);
+}
+
+.comments{
+  margin-top:20px;
+}
+
+.comment{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+}
+
+.comment strong{
+  display:block;
+  margin-bottom:5px;
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  margin:20px 0;
+}
+
+.stat{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+}
+
+.stat h2{
+  color:var(--primary);
+  margin-top:8px;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  bottom:25px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:#222;
+  color:white;
+  padding:13px 20px;
+  border-radius:8px;
+  z-index:1000;
+  opacity:0;
+  transition:.3s;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:800px){
+
+  header{
+    gap:8px;
+  }
+
+  .logo{
+    font-size:19px;
+  }
+
+  .sidebar{
+    width:70px;
+  }
+
+  .side-btn{
+    text-align:center;
+    padding:14px 5px;
+    font-size:0;
+  }
+
+  .side-btn::first-letter{
+    font-size:20px;
+  }
+
+  .main{
+    margin-left:70px;
+    width:calc(100% - 70px);
+    padding:15px;
+  }
+
+  .hero{
+    padding:28px;
+  }
+
+  .hero h1{
+    font-size:28px;
+  }
+
+  .search{
+    max-width:none;
+  }
+}
+
+@media(max-width:550px){
+
+  header{
+    flex-wrap:wrap;
+    height:auto;
+    padding:10px;
+  }
+
+  .search{
+    order:3;
+    width:100%;
+  }
+
+  .sidebar{
+    top:112px;
+    min-height:calc(100vh - 112px);
+  }
+
+  .main{
+    margin-left:70px;
+  }
+
+  .video-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
 </head>
+
 <body>
 
-    <div class="chat-container">
-        <!-- SCREEN 1: Choose Username -->
-        <div id="setup-screen">
-            <h2>Join Chat Room</h2>
-            <input type="text" id="username-input" placeholder="Enter your name..." autocomplete="off">
-            <button id="join-btn">Join Chat</button>
-        </div>
+<!-- HEADER -->
 
-        <!-- SCREEN 2: The Chat Interface -->
-        <div id="chat-screen">
-            <div class="chat-header">
-                <span id="room-title">Chat Room</span>
-                <button class="leave-btn" id="leave-btn">Leave</button>
-            </div>
-            <div class="messages-box" id="messages-box">
-                <!-- Messages will appear here dynamically -->
-            </div>
-            <div class="input-area">
-                <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
-                <button id="send-btn">Send</button>
-            </div>
-        </div>
+<header>
+
+  <div class="logo" onclick="showPage('home')">
+    ▶ Vidoo
+  </div>
+
+  <div class="search">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Search videos..."
+    >
+    <button onclick="searchVideos()">🔍</button>
+  </div>
+
+  <div class="header-actions">
+
+    <button
+      class="icon-btn"
+      onclick="toggleDarkMode()"
+      title="Dark mode"
+    >
+      🌙
+    </button>
+
+    <div
+      class="avatar"
+      id="headerAvatar"
+      onclick="showPage('profile')"
+    >
+      G
     </div>
 
-    <script>
-        const setupScreen = document.getElementById('setup-screen');
-        const chatScreen = document.getElementById('chat-screen');
-        const usernameInput = document.getElementById('username-input');
-        const joinBtn = document.getElementById('join-btn');
-        const leaveBtn = document.getElementById('leave-btn');
-        const messagesBox = document.getElementById('messages-box');
-        const msgInput = document.getElementById('msg-input');
-        const sendBtn = document.getElementById('send-btn');
+  </div>
 
-        let currentUser = "";
+</header>
 
-        // 1. Join Chat Logic
-        joinBtn.addEventListener('click', () => {
-            const name = usernameInput.value.trim();
-            if (name) {
-                currentUser = name;
-                setupScreen.style.display = 'none';
-                chatScreen.style.display = 'flex';
-                loadMessages();
-            }
-        });
 
-        // 2. Send Message Logic
-        function sendMessage() {
-            const text = msgInput.value.trim();
-            if (!text) return;
+<div class="layout">
 
-            // Grab existing messages or start a new array
-            const chatHistory = JSON.parse(localStorage.getItem('multi_chat_history')) || [];
-            
-            // Create a new message object
-            const newMsg = {
-                sender: currentUser,
-                text: text,
-                timestamp: Date.now()
-            };
+<!-- SIDEBAR -->
 
-            chatHistory.push(newMsg);
-            localStorage.setItem('multi_chat_history', JSON.stringify(chatHistory));
+<aside class="sidebar">
 
-            msgInput.value = "";
-            loadMessages();
+  <button class="side-btn active" data-page="home"
+    onclick="showPage('home')">
+    🏠 Home
+  </button>
 
-            // Trigger an update event manually for the local tab
-            window.dispatchEvent(new Event('storage'));
-        }
+  <button class="side-btn" data-page="trending"
+    onclick="showPage('trending')">
+    🔥 Trending
+  </button>
 
-        sendBtn.addEventListener('click', sendMessage);
-        msgInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+  <button class="side-btn" data-page="music"
+    onclick="filterCategory('Music')">
+    🎵 Music
+  </button>
 
-        // 3. Load and Display Messages
-        function loadMessages() {
-            const chatHistory = JSON.parse(localStorage.getItem('multi_chat_history')) || [];
-            messagesBox.innerHTML = ''; // Clear previous UI content
+  <button class="side-btn" data-page="gaming"
+    onclick="filterCategory('Gaming')">
+    🎮 Gaming
+  </button>
 
-            chatHistory.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                // Check if message belongs to the current user or someone else
-                const isMe = msg.sender === currentUser;
-                
-                msgDiv.className = `msg ${isMe ? 'me' : 'others'}`;
-                msgDiv.innerHTML = `<span class="sender">${msg.sender}</span>${msg.text}`;
-                
-                messagesBox.appendChild(msgDiv);
-            });
+  <button class="side-btn" data-page="technology"
+    onclick="filterCategory('Technology')">
+    💻 Technology
+  </button>
 
-            // Scroll to the bottom of the chat box
-            messagesBox.scrollTop = messagesBox.scrollHeight;
-        }
+  <button class="side-btn" data-page="education"
+    onclick="filterCategory('Education')">
+    📚 Education
+  </button>
 
-        // 4. Live Sync Across Tabs/Windows
-        // This listens to any changes happening in localStorage on another tab
-        window.addEventListener('storage', () => {
-            if (chatScreen.style.display === 'flex') {
-                loadMessages();
-            }
-        });
+  <button class="side-btn" data-page="history"
+    onclick="filterCategory('History')">
+    🏛️ History
+  </button>
 
-        // 5. Leave Chat Logic
-        leaveBtn.addEventListener('click', () => {
-            currentUser = "";
-            chatScreen.style.display = 'none';
-            setupScreen.style.display = 'flex';
-            usernameInput.value = "";
-        });
-    </script>
+  <hr style="border:0;border-top:1px solid var(--border);margin:12px 5px">
+
+  <button class="side-btn"
+    onclick="showPage('watchlater')">
+    ⏰ Watch Later
+  </button>
+
+  <button class="side-btn"
+    onclick="showPage('historypage')">
+    🕘 History
+  </button>
+
+  <button class="side-btn"
+    onclick="showPage('profile')">
+    👤 Profile
+  </button>
+
+  <button class="side-btn"
+    onclick="showPage('studio')">
+    🎬 Creator Studio
+  </button>
+
+  <button class="side-btn"
+    onclick="showPage('login')">
+    🔐 Sign In
+  </button>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+
+<!-- HOME -->
+
+<section id="home" class="page active">
+
+  <div class="hero">
+
+    <h1>Welcome to Vidoo</h1>
+
+    <p>
+      Watch, discover and share amazing videos.
+    </p>
+
+    <button class="primary"
+      onclick="showPage('trending')">
+      Explore Trending
+    </button>
+
+  </div>
+
+
+  <div class="chips">
+
+    <button class="chip active"
+      onclick="renderVideos(videos)">
+      All
+    </button>
+
+    <button class="chip"
+      onclick="filterCategory('Music')">
+      Music
+    </button>
+
+    <button class="chip"
+      onclick="filterCategory('Gaming')">
+      Gaming
+    </button>
+
+    <button class="chip"
+      onclick="filterCategory('Technology')">
+      Technology
+    </button>
+
+    <button class="chip"
+      onclick="filterCategory('Education')">
+      Education
+    </button>
+
+    <button class="chip"
+      onclick="filterCategory('History')">
+      History
+    </button>
+
+  </div>
+
+
+  <h2 style="margin-bottom:20px">
+    Recommended Videos
+  </h2>
+
+  <div id="homeGrid" class="video-grid"></div>
+
+</section>
+
+
+<!-- TRENDING -->
+
+<section id="trending" class="page">
+
+  <h1 style="margin-bottom:20px">
+    🔥 Trending
+  </h1>
+
+  <div id="trendingGrid" class="video-grid"></div>
+
+</section>
+
+
+<!-- WATCH LATER -->
+
+<section id="watchlater" class="page">
+
+  <h1 style="margin-bottom:20px">
+    ⏰ Watch Later
+  </h1>
+
+  <div id="watchGrid" class="video-grid"></div>
+
+</section>
+
+
+<!-- HISTORY -->
+
+<section id="historypage" class="page">
+
+  <h1 style="margin-bottom:20px">
+    🕘 Watch History
+  </h1>
+
+  <button class="small-btn"
+    onclick="clearHistory()">
+    Clear History
+  </button>
+
+  <br><br>
+
+  <div id="historyGrid" class="video-grid"></div>
+
+</section>
+
+
+<!-- PROFILE -->
+
+<section id="profile" class="page">
+
+  <h1 style="margin-bottom:20px">
+    👤 My Profile
+  </h1>
+
+  <div class="profile-card">
+
+    <div
+      class="profile-avatar"
+      id="profileAvatar">
+      G
+    </div>
+
+    <h2 id="profileName">
+      Guest User
+    </h2>
+
+    <p id="profileEmail"
+      style="color:var(--muted);margin:7px 0 20px">
+      Not signed in
+    </p>
+
+    <button class="primary"
+      onclick="showPage('login')">
+      Account Settings
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- LOGIN -->
+
+<section id="login" class="page">
+
+  <div class="login-box">
+
+    <h2 id="authTitle">
+      Sign in to Vidoo
+    </h2>
+
+    <p
+      id="authStatus"
+      class="auth-status">
+      You are currently signed out.
+    </p>
+
+
+    <!-- AUTH FORM -->
+
+    <div id="authForm">
+
+      <div class="form-group">
+
+        <label>Name</label>
+
+        <input
+          id="loginName"
+          type="text"
+          placeholder="Enter your name"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>Email</label>
+
+        <input
+          id="loginEmail"
+          type="email"
+          placeholder="Enter your email"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>Password</label>
+
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Enter password"
+        >
+
+      </div>
+
+
+      <button
+        class="primary"
+        id="loginSubmit">
+        🔐 Sign In
+      </button>
+
+      <button
+        class="small-btn"
+        id="switchAuth"
+        style="margin-left:6px">
+        Create Account
+      </button>
+
+    </div>
+
+
+    <!-- LOGGED IN -->
+
+    <div id="loggedInBox"
+      class="hidden">
+
+      <div style="
+        padding:18px;
+        background:var(--bg);
+        border-radius:12px;
+        margin-bottom:15px">
+
+        <h3 id="loggedUserName"></h3>
+
+        <p
+          id="loggedUserEmail"
+          style="color:var(--muted);margin-top:5px">
+        </p>
+
+      </div>
+
+      <button
+        class="primary"
+        id="logoutBtn">
+        🚪 Sign Out
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- CREATOR STUDIO -->
+
+<section id="studio" class="page">
+
+  <h1>
+    🎬 Creator Studio
+  </h1>
+
+  <div class="stats">
+
+    <div class="stat">
+      <p>Videos</p>
+      <h2 id="videoCount">0</h2>
+    </div>
+
+    <div class="stat">
+      <p>Likes</p>
+      <h2 id="likeCount">0</h2>
+    </div>
+
+    <div class="stat">
+      <p>Watch Later</p>
+      <h2 id="laterCount">0</h2>
+    </div>
+
+  </div>
+
+
+  <div class="form-box">
+
+    <h2 style="margin-bottom:20px">
+      Upload Video
+    </h2>
+
+    <div class="form-group">
+
+      <label>Video Title</label>
+
+      <input
+        id="uploadTitle"
+        placeholder="Enter video title"
+      >
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Category</label>
+
+      <select id="uploadCategory">
+
+        <option>Music</option>
+        <option>Gaming</option>
+        <option>Technology</option>
+        <option>Education</option>
+        <option>History</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Description</label>
+
+      <textarea
+        id="uploadDescription"
+        placeholder="Video description">
+      </textarea>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Choose Video File</label>
+
+      <input
+        id="videoFile"
+        type="file"
+        accept="video/*"
+      >
+
+    </div>
+
+
+    <button
+      class="primary"
+      onclick="uploadVideo()">
+      ⬆️ Add Video
+    </button>
+
+  </div>
+
+</section>
+
+
+</main>
+</div>
+
+
+<!-- VIDEO MODAL -->
+
+<div
+  id="videoModal"
+  class="modal"
+  onclick="closeModal(event)">
+
+  <div
+    class="modal-box"
+    onclick="event.stopPropagation()">
+
+    <button
+      class="close"
+      onclick="closeVideo()">
+      ×
+    </button>
+
+    <h2 id="modalTitle">
+      Video
+    </h2>
+
+    <p
+      id="modalChannel"
+      style="color:var(--muted);margin:7px 0">
+    </p>
+
+    <video
+      id="videoPlayer"
+      class="video-player"
+      controls>
+    </video>
+
+    <div class="modal-actions">
+
+      <button
+        class="small-btn"
+        id="likeButton">
+        👍 Like
+      </button>
+
+      <button
+        class="small-btn"
+        id="laterButton">
+        ⏰ Watch Later
+      </button>
+
+      <button
+        class="small-btn"
+        onclick="shareVideo()">
+        🔗 Share
+      </button>
+
+      <button
+        class="small-btn"
+        onclick="nextVideo()">
+        ▶ Next
+      </button>
+
+    </div>
+
+    <p
+      id="modalDescription"
+      style="line-height:1.6">
+    </p>
+
+    <div class="comments">
+
+      <h3 style="margin-bottom:10px">
+        Comments
+      </h3>
+
+      <input
+        id="commentInput"
+        placeholder="Write a comment..."
+        style="
+          width:100%;
+          padding:12px;
+          border:1px solid var(--border);
+          border-radius:8px;
+          background:var(--bg);
+          color:var(--text);
+          margin-bottom:10px;
+        "
+      >
+
+      <button
+        class="primary"
+        onclick="addComment()">
+        Comment
+      </button>
+
+      <div id="commentsList"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+  id="toast"
+  class="toast">
+</div>
+
+
+<script>
+
+/* =========================================
+   DATA
+========================================= */
+
+const defaultVideos = [
+
+  {
+    id:1,
+    title:"Amazing Music Mix",
+    channel:"Vidoo Music",
+    category:"Music",
+    duration:"4:25",
+    icon:"🎵",
+    description:"Enjoy this amazing music collection.",
+    views:12000,
+    likes:0,
+    comments:[]
+  },
+
+  {
+    id:2,
+    title:"Learn JavaScript Easily",
+    channel:"Code Academy",
+    category:"Technology",
+    duration:"8:42",
+    icon:"💻",
+    description:"Learn JavaScript concepts in a simple way.",
+    views:8500,
+    likes:0,
+    comments:[]
+  },
+
+  {
+    id:3,
+    title:"Epic Gaming Highlights",
+    channel:"Game Zone",
+    category:"Gaming",
+    duration:"12:10",
+    icon:"🎮",
+    description:"The best gaming highlights and moments.",
+    views:23000,
+    likes:0,
+    comments:[]
+  },
+
+  {
+    id:4,
+    title:"Science Explained",
+    channel:"Study World",
+    category:"Education",
+    duration:"7:32",
+    icon:"🔬",
+    description:"Interesting science concepts explained simply.",
+    views:6200,
+    likes:0,
+    comments:[]
+  },
+
+  {
+    id:5,
+    title:"Ancient History",
+    channel:"History Hub",
+    category:"History",
+    duration:"10:20",
+    icon:"🏛️",
+    description:"Discover fascinating moments from history.",
+    views:9100,
+    likes:0,
+    comments:[]
+  },
+
+  {
+    id:6,
+    title:"Future Technology",
+    channel:"Tech Daily",
+    category:"Technology",
+    duration:"6:15",
+    icon:"🤖",
+    description:"Explore exciting technology of the future.",
+    views:18000,
+    likes:0,
+    comments:[]
+  }
+
+];
+
+
+let savedData =
+  JSON.parse(localStorage.getItem("vidooData") || "null");
+
+
+let data = savedData || {
+
+  user:{
+    loggedIn:false,
+    name:"",
+    email:""
+  },
+
+  videos:defaultVideos,
+
+  watchLater:[],
+
+  history:[],
+
+  liked:[],
+
+  comments:{}
+
+};
+
+
+let videos = data.videos;
+
+let currentVideoId = null;
+
+let isCreatingAccount = false;
+
+
+/* =========================================
+   SAVE DATA
+========================================= */
+
+function save(){
+
+  data.videos = videos;
+
+  localStorage.setItem(
+    "vidooData",
+    JSON.stringify(data)
+  );
+
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+function toast(message){
+
+  const box =
+    document.getElementById("toast");
+
+  box.textContent = message;
+
+  box.classList.add("show");
+
+  setTimeout(()=>{
+    box.classList.remove("show");
+  },2500);
+
+}
+
+
+/* =========================================
+   PAGE NAVIGATION
+========================================= */
+
+function showPage(page){
+
+  document
+    .querySelectorAll(".page")
+    .forEach(p=>{
+      p.classList.remove("active");
+    });
+
+
+  const target =
+    document.getElementById(page);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+
+  document
+    .querySelectorAll(".side-btn")
+    .forEach(btn=>{
+      btn.classList.remove("active");
+
+      if(btn.dataset.page === page){
+        btn.classList.add("active");
+      }
+    });
+
+
+  if(page === "login"){
+    updateAuthUI();
+  }
+
+  if(page === "profile"){
+    renderProfile();
+  }
+
+  if(page === "watchlater"){
+    renderWatchLater();
+  }
+
+  if(page === "historypage"){
+    renderHistory();
+  }
+
+  if(page === "studio"){
+    updateStats();
+  }
+
+  window.scrollTo(0,0);
+}
+
+
+/* =========================================
+   VIDEO CARD
+========================================= */
+
+function videoCard(video){
+
+  return `
+
+    <div
+      class="video-card"
+      onclick="openVideo(${video.id})">
+
+      <div class="thumbnail">
+
+        <span>
+          ${video.icon || "▶️"}
+        </span>
+
+        <span class="duration">
+          ${video.duration || "00:00"}
+        </span>
+
+      </div>
+
+      <div class="video-info">
+
+        <h3>
+          ${escapeHTML(video.title)}
+        </h3>
+
+        <p>
+          ${escapeHTML(video.channel || "You")}
+        </p>
+
+        <p>
+          ${video.views || 0} views •
+          ${escapeHTML(video.category || "General")}
+        </p>
+
+      </div>
+
+    </div>
+  `;
+}
+
+
+/* =========================================
+   RENDER VIDEOS
+========================================= */
+
+function renderVideos(list){
+
+  const grid =
+    document.getElementById("homeGrid");
+
+  grid.innerHTML =
+    list.length
+    ? list.map(videoCard).join("")
+    : "<p>No videos found.</p>";
+
+}
+
+
+/* =========================================
+   TRENDING
+========================================= */
+
+function renderTrending(){
+
+  const sorted =
+    [...videos]
+    .sort((a,b)=>
+      (b.views || 0) -
+      (a.views || 0)
+    );
+
+  document.getElementById("trendingGrid")
+    .innerHTML =
+    sorted.map(videoCard).join("");
+}
+
+
+/* =========================================
+   CATEGORY
+========================================= */
+
+function filterCategory(category){
+
+  showPage("home");
+
+  const filtered =
+    videos.filter(v =>
+      v.category === category
+    );
+
+  renderVideos(filtered);
+
+  toast(category + " videos");
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+function searchVideos(){
+
+  const query =
+    document
+      .getElementById("searchInput")
+      .value
+      .trim()
+      .toLowerCase();
+
+  if(!query){
+
+    renderVideos(videos);
+
+    return;
+  }
+
+  const results =
+    videos.filter(v=>
+      v.title.toLowerCase().includes(query) ||
+      v.channel.toLowerCase().includes(query) ||
+      v.category.toLowerCase().includes(query)
+    );
+
+  showPage("home");
+
+  renderVideos(results);
+
+  toast(
+    results.length +
+    " video(s) found"
+  );
+}
+
+
+document
+  .getElementById("searchInput")
+  .addEventListener("keydown",e=>{
+
+    if(e.key === "Enter"){
+      searchVideos();
+    }
+
+  });
+
+
+/* =========================================
+   OPEN VIDEO
+========================================= */
+
+function openVideo(id){
+
+  const video =
+    videos.find(v=>v.id === id);
+
+  if(!video) return;
+
+  currentVideoId = id;
+
+  video.views =
+    (video.views || 0) + 1;
+
+  save();
+
+  if(!data.history.includes(id)){
+    data.history.unshift(id);
+  }
+
+  data.history =
+    data.history.slice(0,30);
+
+  save();
+
+
+  document.getElementById("modalTitle")
+    .textContent = video.title;
+
+  document.getElementById("modalChannel")
+    .textContent =
+    video.channel +
+    " • " +
+    video.views +
+    " views";
+
+  document.getElementById("modalDescription")
+    .textContent =
+    video.description || "";
+
+
+  const player =
+    document.getElementById("videoPlayer");
+
+
+  if(video.url){
+
+    player.src = video.url;
+
+  }else{
+
+    player.removeAttribute("src");
+
+  }
+
+
+  updateLikeButton();
+  updateLaterButton();
+  renderComments();
+
+
+  document
+    .getElementById("videoModal")
+    .classList.add("show");
+
+}
+
+
+/* =========================================
+   CLOSE VIDEO
+========================================= */
+
+function closeVideo(){
+
+  const modal =
+    document.getElementById("videoModal");
+
+  modal.classList.remove("show");
+
+  const player =
+    document.getElementById("videoPlayer");
+
+  player.pause();
+
+}
+
+
+function closeModal(event){
+
+  if(event.target.id === "videoModal"){
+    closeVideo();
+  }
+
+}
+
+
+/* =========================================
+   LIKE
+========================================= */
+
+document
+  .getElementById("likeButton")
+  .addEventListener("click",()=>{
+
+    if(!currentVideoId) return;
+
+    const index =
+      data.liked.indexOf(currentVideoId);
+
+    const video =
+      videos.find(v=>
+        v.id === currentVideoId
+      );
+
+    if(index === -1){
+
+      data.liked.push(currentVideoId);
+
+      video.likes =
+        (video.likes || 0) + 1;
+
+      toast("Video liked 👍");
+
+    }else{
+
+      data.liked.splice(index,1);
+
+      video.likes =
+        Math.max(
+          0,
+          (video.likes || 0) - 1
+        );
+
+      toast("Like removed");
+
+    }
+
+    save();
+
+    updateLikeButton();
+    updateStats();
+
+  });
+
+
+function updateLikeButton(){
+
+  const button =
+    document.getElementById("likeButton");
+
+  if(data.liked.includes(currentVideoId)){
+
+    button.textContent =
+      "❤️ Liked";
+
+  }else{
+
+    button.textContent =
+      "👍 Like";
+
+  }
+
+}
+
+
+/* =========================================
+   WATCH LATER
+========================================= */
+
+document
+  .getElementById("laterButton")
+  .addEventListener("click",()=>{
+
+    const index =
+      data.watchLater
+        .indexOf(currentVideoId);
+
+
+    if(index === -1){
+
+      data.watchLater
+        .push(currentVideoId);
+
+      toast("Added to Watch Later ⏰");
+
+    }else{
+
+      data.watchLater
+        .splice(index,1);
+
+      toast("Removed from Watch Later");
+
+    }
+
+    save();
+
+    updateLaterButton();
+    updateStats();
+
+  });
+
+
+function updateLaterButton(){
+
+  const button =
+    document.getElementById("laterButton");
+
+  if(data.watchLater.includes(currentVideoId)){
+
+    button.textContent =
+      "✓ In Watch Later";
+
+  }else{
+
+    button.textContent =
+      "⏰ Watch Later";
+
+  }
+
+}
+
+
+/* =========================================
+   WATCH LATER PAGE
+========================================= */
+
+function renderWatchLater(){
+
+  const list =
+    data.watchLater
+      .map(id =>
+        videos.find(v=>v.id===id)
+      )
+      .filter(Boolean);
+
+  document.getElementById("watchGrid")
+    .innerHTML =
+      list.length
+      ? list.map(videoCard).join("")
+      : "<p>Your Watch Later list is empty.</p>";
+
+}
+
+
+/* =========================================
+   HISTORY
+========================================= */
+
+function renderHistory(){
+
+  const list =
+    data.history
+      .map(id =>
+        videos.find(v=>v.id===id)
+      )
+      .filter(Boolean);
+
+  document.getElementById("historyGrid")
+    .innerHTML =
+      list.length
+      ? list.map(videoCard).join("")
+      : "<p>Your watch history is empty.</p>";
+
+}
+
+
+function clearHistory(){
+
+  data.history = [];
+
+  save();
+
+  renderHistory();
+
+  toast("History cleared");
+
+}
+
+
+/* =========================================
+   COMMENTS
+========================================= */
+
+function renderComments(){
+
+  const video =
+    videos.find(v=>
+      v.id === currentVideoId
+    );
+
+  const comments =
+    video?.comments || [];
+
+  const box =
+    document.getElementById("commentsList");
+
+
+  if(!comments.length){
+
+    box.innerHTML =
+      "<p style='color:var(--muted);margin-top:15px'>No comments yet.</p>";
+
+    return;
+  }
+
+
+  box.innerHTML =
+    comments.map(c=>`
+
+      <div class="comment">
+
+        <strong>
+          ${escapeHTML(c.name)}
+        </strong>
+
+        <span>
+          ${escapeHTML(c.text)}
+        </span>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function addComment(){
+
+  if(!currentVideoId) return;
+
+
+  const input =
+    document.getElementById("commentInput");
+
+  const text =
+    input.value.trim();
+
+  if(!text){
+
+    toast("Write a comment first.");
+
+    return;
+  }
+
+
+  const video =
+    videos.find(v=>
+      v.id === currentVideoId
+    );
+
+
+  if(!video.comments){
+    video.comments = [];
+  }
+
+
+  video.comments.unshift({
+
+    name:
+      data.user.loggedIn
+      ? data.user.name
+      : "Guest",
+
+    text:text
+
+  });
+
+
+  input.value = "";
+
+  save();
+
+  renderComments();
+
+  toast("Comment added 💬");
+
+}
+
+
+/* =========================================
+   SHARE
+========================================= */
+
+function shareVideo(){
+
+  const video =
+    videos.find(v=>
+      v.id === currentVideoId
+    );
+
+  if(!video) return;
+
+
+  if(navigator.share){
+
+    navigator.share({
+
+      title:video.title,
+
+      text:
+        "Watch " +
+        video.title +
+        " on Vidoo"
+
+    }).catch(()=>{});
+
+  }else{
+
+    navigator.clipboard
+      ?.writeText(video.title);
+
+    toast("Video title copied 🔗");
+
+  }
+
+}
+
+
+/* =========================================
+   NEXT VIDEO
+========================================= */
+
+function nextVideo(){
+
+  const index =
+    videos.findIndex(v=>
+      v.id === currentVideoId
+    );
+
+  const next =
+    videos[
+      (index + 1) % videos.length
+    ];
+
+  if(next){
+    openVideo(next.id);
+  }
+
+}
+
+
+/* =========================================
+   AUTHENTICATION
+========================================= */
+
+function updateAuthUI(){
+
+  const form =
+    document.getElementById("authForm");
+
+  const loggedBox =
+    document.getElementById("loggedInBox");
+
+  const title =
+    document.getElementById("authTitle");
+
+  const status =
+    document.getElementById("authStatus");
+
+  const switchBtn =
+    document.getElementById("switchAuth");
+
+
+  if(data.user.loggedIn){
+
+    form.classList.add("hidden");
+
+    loggedBox.classList.remove("hidden");
+
+    title.textContent =
+      "Your Account";
+
+    status.textContent =
+      "You are signed in.";
+
+    document
+      .getElementById("loggedUserName")
+      .textContent =
+      data.user.name;
+
+    document
+      .getElementById("loggedUserEmail")
+      .textContent =
+      data.user.email;
+
+    switchBtn.classList.add("hidden");
+
+
+    document
+      .getElementById("headerAvatar")
+      .textContent =
+      (data.user.name || "U")
+      .charAt(0)
+      .toUpperCase();
+
+
+  }else{
+
+    form.classList.remove("hidden");
+
+    loggedBox.classList.add("hidden");
+
+    title.textContent =
+      isCreatingAccount
+      ? "Create your Vidoo account"
+      : "Sign in to Vidoo";
+
+    status.textContent =
+      "You are currently signed out.";
+
+    switchBtn.classList.remove("hidden");
+
+    switchBtn.textContent =
+      isCreatingAccount
+      ? "Already have an account?"
+      : "Create Account";
+
+    document
+      .getElementById("headerAvatar")
+      .textContent = "G";
+
+  }
+
+}
+
+
+/* =========================================
+   SIGN IN / CREATE ACCOUNT
+========================================= */
+
+document
+  .getElementById("loginSubmit")
+  .addEventListener("click",()=>{
+
+    const name =
+      document
+        .getElementById("loginName")
+        .value.trim();
+
+    const email =
+      document
+        .getElementById("loginEmail")
+        .value.trim();
+
+    const password =
+      document
+        .getElementById("loginPassword")
+        .value;
+
+
+    if(!name){
+
+      toast("Please enter your name.");
+
+      return;
+    }
+
+
+    if(!email || !email.includes("@")){
+
+      toast("Please enter a valid email.");
+
+      return;
+    }
+
+
+    if(password.length < 4){
+
+      toast(
+        "Password must contain at least 4 characters."
+      );
+
+      return;
+    }
+
+
+    data.user = {
+
+      loggedIn:true,
+
+      name:name,
+
+      email:email
+
+    };
+
+
+    save();
+
+    updateAuthUI();
+
+    renderProfile();
+
+    toast(
+      isCreatingAccount
+      ? "Account created successfully 🎉"
+      : "Signed in successfully 🔐"
+    );
+
+    showPage("profile");
+
+  });
+
+
+/* =========================================
+   SWITCH AUTH
+========================================= */
+
+document
+  .getElementById("switchAuth")
+  .addEventListener("click",()=>{
+
+    isCreatingAccount =
+      !isCreatingAccount;
+
+    updateAuthUI();
+
+  });
+
+
+/* =========================================
+   SIGN OUT
+========================================= */
+
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click",()=>{
+
+    data.user.loggedIn = false;
+
+    save();
+
+    updateAuthUI();
+
+    renderProfile();
+
+    toast("You have been signed out 👋");
+
+  });
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+function renderProfile(){
+
+  const name =
+    data.user.loggedIn
+    ? data.user.name
+    : "Guest User";
+
+
+  const email =
+    data.user.loggedIn
+    ? data.user.email
+    : "Not signed in";
+
+
+  document
+    .getElementById("profileName")
+    .textContent = name;
+
+
+  document
+    .getElementById("profileEmail")
+    .textContent = email;
+
+
+  document
+    .getElementById("profileAvatar")
+    .textContent =
+    name
+      .charAt(0)
+      .toUpperCase();
+
+
+  document
+    .getElementById("headerAvatar")
+    .textContent =
+    name === "Guest User"
+    ? "G"
+    : name.charAt(0).toUpperCase();
+
+}
+
+
+/* =========================================
+   DARK MODE
+========================================= */
+
+function toggleDarkMode(){
+
+  document
+    .body
+    .classList
+    .toggle("dark");
+
+  localStorage.setItem(
+    "vidooDark",
+    document.body.classList.contains("dark")
+  );
+
+}
+
+
+if(
+  localStorage.getItem("vidooDark") === "true"
+){
+
+  document.body.classList.add("dark");
+
+}
+
+
+/* =========================================
+   UPLOAD VIDEO
+========================================= */
+
+function uploadVideo(){
+
+  const title =
+    document
+      .getElementById("uploadTitle")
+      .value.trim();
+
+  const category =
+    document
+      .getElementById("uploadCategory")
+      .value;
+
+  const description =
+    document
+      .getElementById("uploadDescription")
+      .value.trim();
+
+  const file =
+    document
+      .getElementById("videoFile")
+      .files[0];
+
+
+  if(!title){
+
+    toast("Enter a video title.");
+
+    return;
+  }
+
+
+  if(!file){
+
+    toast("Choose a video file.");
+
+    return;
+  }
+
+
+  const url =
+    URL.createObjectURL(file);
+
+
+  const newVideo = {
+
+    id:Date.now(),
+
+    title:title,
+
+    channel:
+      data.user.loggedIn
+      ? data.user.name
+      : "My Channel",
+
+    category:category,
+
+    duration:"00:00",
+
+    icon:"🎬",
+
+    description:
+      description ||
+      "Uploaded to Vidoo.",
+
+    views:0,
+
+    likes:0,
+
+    comments:[],
+
+    url:url
+
+  };
+
+
+  videos.unshift(newVideo);
+
+  save();
+
+  document
+    .getElementById("uploadTitle")
+    .value = "";
+
+  document
+    .getElementById("uploadDescription")
+    .value = "";
+
+  document
+    .getElementById("videoFile")
+    .value = "";
+
+
+  renderVideos(videos);
+
+  updateStats();
+
+  toast("Video added successfully 🎉");
+
+}
+
+
+/* =========================================
+   STATS
+========================================= */
+
+function updateStats(){
+
+  document
+    .getElementById("videoCount")
+    .textContent =
+    videos.length;
+
+
+  document
+    .getElementById("likeCount")
+    .textContent =
+    data.liked.length;
+
+
+  document
+    .getElementById("laterCount")
+    .textContent =
+    data.watchLater.length;
+
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHTML(text){
+
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+renderVideos(videos);
+
+renderTrending();
+
+renderProfile();
+
+updateAuthUI();
+
+updateStats();
+
+
+/* =========================================
+   KEEP TRENDING UPDATED
+========================================= */
+
+setInterval(()=>{
+  renderTrending();
+},2000);
+
+</script>
+
 </body>
 </html>
